@@ -2,14 +2,15 @@
 nixPkgs = ["nodejs_18"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = ["npm ci --only=production"]
 
 [phases.build]
 cmds = [
-  "npm run build"
+  "npm run prisma:generate",
+  "npx tsc"
 ]
 
 [start]
-cmd = "npm run start:prod"
+cmd = "npx prisma db push && node dist/main.js"
 
 
