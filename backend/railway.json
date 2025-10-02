@@ -5,7 +5,7 @@
     "nixpacksConfigPath": "nixpacks.toml"
   },
   "deploy": {
-    "startCommand": "npx prisma db push && node dist/main.js",
+    "startCommand": "npx prisma db push --accept-data-loss && node dist/main.js",
     "healthcheckPath": "/",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
