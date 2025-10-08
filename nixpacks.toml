@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ["nodejs_18"]
+
+[phases.install]
+cmds = ["npm ci --production=false --prefix backend"]
+
+[phases.build]
+cmds = ["npm run build --prefix backend"]
+
+[start]
+cmd = "cd backend && npm run start:prod"
+

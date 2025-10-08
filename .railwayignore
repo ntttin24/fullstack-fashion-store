@@ -1,0 +1,7 @@
+# Ignore frontend (only deploy backend)
+frontend/
+
+# Ignore docs and configs
+README.md
+RAILWAY_DEPLOY.md
+vercel.json
