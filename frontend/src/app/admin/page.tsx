@@ -150,12 +150,6 @@ export default function AdminDashboard() {
     fetchStats();
   }, [fetchStats]);
 
-  useEffect(() => {
-    if (stats.revenueData.length > 0) {
-      fetchStats();
-    }
-  }, [fetchStats, stats.revenueData.length]);
-
   const exportChartData = () => {
     const csvContent = [
       ['Thời gian', 'Doanh thu (VNĐ)', 'Số đơn hàng'],
@@ -567,49 +561,136 @@ export default function AdminDashboard() {
           ) : (
             <div className="space-y-4">
               {/* Chart */}
-              <div className="relative h-80 sm:h-96 flex items-end justify-between gap-1 sm:gap-2 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-2 sm:p-4 overflow-x-auto">
-                {stats.revenueData.map((item, index) => {
-                  const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
-                  const height = maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
-                  
-                  return (
-                    <div key={index} className="flex-1 min-w-[40px] sm:min-w-[60px] flex flex-col items-center group relative">
-                      {/* Tooltip */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute -top-20 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 pointer-events-none z-20 whitespace-nowrap shadow-lg">
-                        <div className="font-semibold">{item.revenue.toLocaleString('vi-VN')}đ</div>
-                        <div className="text-gray-300">{item.orders} đơn hàng</div>
-                        <div className="text-gray-300">{item.label}</div>
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                      </div>
-                      
-                      {/* Bar */}
+              <div className="relative bg-white rounded-lg border border-gray-200 p-4">
+                {/* Chart Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Biểu đồ doanh thu</h3>
+                  <div className="text-sm text-gray-500">
+                    Tổng: {stats.totalRevenueForPeriod.toLocaleString('vi-VN')}đ
+                  </div>
+                </div>
+
+                {/* Chart Container */}
+                <div className="relative h-80 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-4 overflow-hidden">
+                  {/* Scroll indicator */}
+                  <div className="absolute top-2 right-2 text-xs text-gray-400 hidden sm:block">
+                    ← Kéo để xem thêm →
+                  </div>
+                  {/* Grid lines */}
+                  <div className="absolute inset-0 ml-12">
+                    {Array.from({ length: 5 }, (_, i) => (
                       <div 
-                        className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-md transition-all duration-500 hover:from-blue-600 hover:to-blue-500 cursor-pointer min-h-[4px] shadow-sm hover:shadow-md"
-                        style={{ height: `${Math.max(4, height)}%` }}
+                        key={i} 
+                        className="absolute w-full border-t border-gray-200"
+                        style={{ top: `${i * 25}%` }}
                       ></div>
+                    ))}
+                  </div>
+                  
+                  {/* Y-axis labels */}
+                  <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500 pr-2">
+                    {(() => {
+                      const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
+                      const steps = 4;
+                      const stepValue = maxRevenue / steps;
+                      return Array.from({ length: steps + 1 }, (_, i) => (
+                        <div key={i} className="text-right">
+                          {((steps - i) * stepValue).toLocaleString('vi-VN')}đ
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                  
+                  <div 
+                    className="flex items-end h-full gap-1 sm:gap-2 ml-8 sm:ml-12 overflow-x-auto pb-2" 
+                    style={{ 
+                      minWidth: 'max-content',
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#d1d5db #f3f4f6',
+                      WebkitOverflowScrolling: 'touch'
+                    }}
+                  >
+                    {stats.revenueData.map((item, index) => {
+                      // Find the maximum revenue for scaling
+                      const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
                       
-                      {/* Label */}
-                      <div className="mt-2 text-[10px] sm:text-xs text-gray-600 text-center font-medium leading-tight">
-                        {item.label}
-                      </div>
+                      // Calculate bar height with better scaling
+                      let barHeight = 0;
+                      if (maxRevenue > 0 && item.revenue > 0) {
+                        // Use 90% of available height for better visual
+                        barHeight = Math.max(20, (item.revenue / maxRevenue) * 250);
+                      } else if (item.revenue === 0) {
+                        barHeight = 4; // Very small bar for zero values
+                      }
                       
-                      {/* Value - Show on mobile only for significant values */}
-                      <div className="text-[9px] sm:text-xs text-gray-500 text-center mt-1">
-                        {item.revenue > 0 ? (
-                          item.revenue >= 1000000 
-                            ? `${(item.revenue / 1000000).toFixed(1)}M`
-                            : item.revenue >= 1000
-                            ? `${(item.revenue / 1000).toFixed(0)}K`
-                            : item.revenue.toString()
-                        ) : '0'}
-                      </div>
-                    </div>
-                  );
-                })}
+                      return (
+                        <div key={index} className="flex flex-col items-center group relative" style={{ minWidth: '70px', flexShrink: 0 }}>
+                          {/* Tooltip */}
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 pointer-events-none z-20 whitespace-nowrap shadow-lg">
+                            <div className="font-semibold">{item.revenue.toLocaleString('vi-VN')}đ</div>
+                            <div className="text-gray-300">{item.orders} đơn hàng</div>
+                            <div className="text-gray-300">{item.label}</div>
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                          
+                          {/* Bar Container */}
+                          <div className="flex flex-col items-center h-full justify-end">
+                            {/* Revenue Value Above Bar */}
+                            {item.revenue > 0 && (
+                              <div className="text-xs font-medium text-gray-700 mb-1">
+                                {item.revenue >= 1000000 
+                                  ? `${(item.revenue / 1000000).toFixed(1)}M`
+                                  : item.revenue >= 1000
+                                  ? `${(item.revenue / 1000).toFixed(0)}K`
+                                  : item.revenue.toLocaleString('vi-VN')
+                                }
+                              </div>
+                            )}
+                            
+                            {/* Bar */}
+                            <div 
+                              className={`w-full rounded-t-lg transition-all duration-500 cursor-pointer shadow-sm hover:shadow-md ${
+                                item.revenue > 0 
+                                  ? 'bg-gradient-to-t from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500' 
+                                  : 'bg-gray-200 hover:bg-gray-300'
+                              }`}
+                              style={{ 
+                                height: `${barHeight}px`,
+                                minHeight: item.revenue > 0 ? '20px' : '4px'
+                              }}
+                            ></div>
+                            
+                            {/* Date Label */}
+                            <div className="mt-2 text-xs text-gray-600 text-center font-medium leading-tight">
+                              {item.label}
+                            </div>
+                            
+                            {/* Order Count */}
+                            <div className="text-xs text-gray-500 text-center mt-1">
+                              {item.orders} đơn
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Chart Legend */}
+                <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-gradient-to-t from-blue-500 to-blue-400 rounded"></div>
+                    <span>Doanh thu (VNĐ)</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <ShoppingCart className="w-4 h-4 text-gray-400" />
+                    <span>Số đơn hàng</span>
+                  </div>
+                </div>
               </div>
 
               {/* Mobile Summary Table */}
-              <div className="block sm:hidden">
+              <div className="block sm:hidden mt-4">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-3 text-sm">Chi tiết doanh thu</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -627,18 +708,6 @@ export default function AdminDashboard() {
                       </div>
                     ))}
                   </div>
-                </div>
-              </div>
-
-              {/* Legend */}
-              <div className="flex items-center justify-center space-x-4 sm:space-x-6 text-xs sm:text-sm text-gray-600 pt-4 border-t">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                  <span>Doanh thu (VNĐ)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <ShoppingCart className="w-3 h-3 text-gray-400" />
-                  <span>Số đơn hàng</span>
                 </div>
               </div>
             </div>
