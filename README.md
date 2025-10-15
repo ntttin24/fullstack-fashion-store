@@ -268,11 +268,6 @@ npx prisma migrate dev    # Chạy lại migrations
 npm run seed              # Import lại data
 ```
 
-
-## 🤝 Contributing
-
-Pull requests are welcome! Đối với thay đổi lớn, vui lòng mở issue trước để thảo luận.
-
 ## 📧 Contact
 
 Nếu có vấn đề gì, hãy tạo issue trên GitHub.

@@ -68,7 +68,7 @@ export default function ProductsPage() {
     }
 
     fetchData()
-  }, [debouncedSearch, priceRange, filters.sortBy])
+  }, [debouncedSearch, priceRange, filters.sortBy, selectedCategories])
 
   const filteredProducts = useMemo(() => {
     let result = [...products]
@@ -84,7 +84,7 @@ export default function ProductsPage() {
     }
 
     return result
-  }, [products])
+  }, [products, selectedCategories])
 
   const handleCategoryToggle = useCallback((categorySlug: string) => {
     setSelectedCategories(prev => 

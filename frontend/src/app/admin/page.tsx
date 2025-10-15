@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { 
   Package, 
   ShoppingCart, 
@@ -12,7 +12,6 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Clock,
-  ShoppingBag,
   Download,
   RefreshCw,
   BarChart3
@@ -72,16 +71,90 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [chartFilter, setChartFilter] = useState<'7days' | '30days' | '3months' | '6months' | '1year'>('7days');
 
+  // Memoize fetcher to satisfy hook deps
+  const fetchStats = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const [productsRes, ordersRes, usersRes] = await Promise.all([
+        fetch(`${API_URL}/products`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_URL}/orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_URL}/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const products = await productsRes.json();
+      const orders = await ordersRes.json();
+      const users = await usersRes.json();
+
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      type OrderForStats = { createdAt: string; total?: number; status?: string; user?: { name?: string } };
+      type ProductForStats = { id: string; name: string; stock: number; price: number };
+
+      const safeOrders: OrderForStats[] = Array.isArray(orders) ? orders : [];
+      const safeProducts: ProductForStats[] = Array.isArray(products) ? products : [];
+
+      const dailyRevenue = safeOrders
+        .filter(order => new Date(order.createdAt) >= startOfDay)
+        .reduce((sum: number, order: OrderForStats) => sum + (order.total || 0), 0);
+
+      const monthlyRevenue = safeOrders
+        .filter(order => new Date(order.createdAt) >= startOfMonth)
+        .reduce((sum: number, order: OrderForStats) => sum + (order.total || 0), 0);
+
+      const pendingOrders = safeOrders.filter(order => order.status === 'PENDING').length;
+
+      const lowStockProducts = safeProducts
+        .filter(p => p.stock < 10)
+        .sort((a, b) => a.stock - b.stock)
+        .slice(0, 5);
+
+      const lowStockCount = safeProducts.filter(p => p.stock < 10).length;
+
+      const recentOrders = safeOrders
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5) as DashboardStats['recentOrders'];
+
+      const { revenueData, previousPeriodRevenue, totalRevenueForPeriod, averageOrderValue } = calculateRevenueData(safeOrders, chartFilter, now);
+
+      setStats({
+        totalProducts: safeProducts.length,
+        totalOrders: safeOrders.length,
+        totalUsers: Array.isArray(users) ? users.length : 0,
+        dailyRevenue,
+        monthlyRevenue,
+        pendingOrders,
+        lowStockCount,
+        recentOrders,
+        lowStockProducts,
+        revenueData,
+        previousPeriodRevenue,
+        totalRevenueForPeriod,
+        averageOrderValue
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [chartFilter]);
+
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   useEffect(() => {
     if (stats.revenueData.length > 0) {
-      // Recalculate revenue data when filter changes
       fetchStats();
     }
-  }, [chartFilter]);
+  }, [fetchStats, stats.revenueData.length]);
 
   const exportChartData = () => {
     const csvContent = [
@@ -109,7 +182,7 @@ export default function AdminDashboard() {
     fetchStats();
   };
 
-  const calculateRevenueData = (orders: any[], filter: string, now: Date) => {
+  const calculateRevenueData = (orders: Array<{ createdAt: string; total?: number }>, filter: string, now: Date) => {
     if (!Array.isArray(orders)) {
       return {
         revenueData: [],
@@ -187,7 +260,7 @@ export default function AdminDashboard() {
         return orderDate >= periodStart && orderDate < periodEnd;
       });
 
-      const revenue = periodOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+      const revenue = periodOrders.reduce((sum: number, order: { total?: number }) => sum + (order.total || 0), 0);
       const orderCount = periodOrders.length;
 
       revenueData.push({
@@ -224,7 +297,7 @@ export default function AdminDashboard() {
       return orderDate >= previousPeriodStart && orderDate < previousPeriodEnd;
     });
 
-    const previousPeriodRevenue = previousPeriodOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+    const previousPeriodRevenue = previousPeriodOrders.reduce((sum: number, order: { total?: number }) => sum + (order.total || 0), 0);
     const totalRevenueForPeriod = revenueData.reduce((sum, item) => sum + item.revenue, 0);
     const totalOrdersForPeriod = revenueData.reduce((sum, item) => sum + item.orders, 0);
     const averageOrderValue = totalOrdersForPeriod > 0 ? totalRevenueForPeriod / totalOrdersForPeriod : 0;
@@ -237,94 +310,6 @@ export default function AdminDashboard() {
     };
   };
 
-  const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Fetch essential data only
-      const [productsRes, ordersRes, usersRes] = await Promise.all([
-        fetch(`${API_URL}/products`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${API_URL}/orders`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${API_URL}/users`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-
-      const products = await productsRes.json();
-      const orders = await ordersRes.json();
-      const users = await usersRes.json();
-
-      // Calculate essential metrics only
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      // Daily revenue
-      const dailyRevenue = Array.isArray(orders)
-        ? orders
-            .filter(order => new Date(order.createdAt) >= startOfDay)
-            .reduce((sum: number, order: any) => sum + (order.total || 0), 0)
-        : 0;
-
-      // Monthly revenue
-      const monthlyRevenue = Array.isArray(orders)
-        ? orders
-            .filter(order => new Date(order.createdAt) >= startOfMonth)
-            .reduce((sum: number, order: any) => sum + (order.total || 0), 0)
-        : 0;
-
-      // Pending orders
-      const pendingOrders = Array.isArray(orders)
-        ? orders.filter(order => order.status === 'PENDING').length
-        : 0;
-
-      // Low stock products
-      const lowStockProducts = Array.isArray(products)
-        ? products
-            .filter(p => p.stock < 10)
-            .sort((a, b) => a.stock - b.stock)
-            .slice(0, 5)
-        : [];
-
-      const lowStockCount = Array.isArray(products)
-        ? products.filter(p => p.stock < 10).length
-        : 0;
-
-      // Recent orders (last 5)
-      const recentOrders = Array.isArray(orders)
-        ? orders
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .slice(0, 5)
-        : [];
-
-      // Calculate revenue data based on selected filter
-      const { revenueData, previousPeriodRevenue, totalRevenueForPeriod, averageOrderValue } = calculateRevenueData(orders, chartFilter, now);
-
-      setStats({
-        totalProducts: Array.isArray(products) ? products.length : 0,
-        totalOrders: Array.isArray(orders) ? orders.length : 0,
-        totalUsers: Array.isArray(users) ? users.length : 0,
-        dailyRevenue,
-        monthlyRevenue,
-        pendingOrders,
-        lowStockCount,
-        recentOrders,
-        lowStockProducts,
-        revenueData,
-        previousPeriodRevenue,
-        totalRevenueForPeriod,
-        averageOrderValue
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const statCards = [
     {
@@ -550,7 +535,7 @@ export default function AdminDashboard() {
             ].map((filter) => (
               <button
                 key={filter.key}
-                onClick={() => setChartFilter(filter.key as any)}
+                onClick={() => setChartFilter(filter.key as typeof chartFilter)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                   chartFilter === filter.key
                     ? 'bg-white text-blue-600 shadow-sm'
