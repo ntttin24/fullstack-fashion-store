@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export const useScrollToTop = (dependency?: any) => {
+export const useScrollToTop = (dependency?: unknown) => {
   useEffect(() => {
     // Immediate scroll to top for better UX
     window.scrollTo({ top: 0, behavior: 'instant' })

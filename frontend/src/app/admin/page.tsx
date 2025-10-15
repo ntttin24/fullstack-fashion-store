@@ -560,131 +560,201 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Chart */}
-              <div className="relative bg-white rounded-lg border border-gray-200 p-4">
+              {/* New Enhanced Chart */}
+              <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                 {/* Chart Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Biểu đồ doanh thu</h3>
-                  <div className="text-sm text-gray-500">
-                    Tổng: {stats.totalRevenueForPeriod.toLocaleString('vi-VN')}đ
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <BarChart3 className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">Biểu đồ doanh thu</h3>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="text-gray-600">
+                        <span className="font-medium">Tổng:</span>
+                        <span className="ml-1 font-bold text-blue-600">
+                          {stats.totalRevenueForPeriod.toLocaleString('vi-VN')}đ
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Chart Container */}
-                <div className="relative h-80 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-4 overflow-hidden">
-                  {/* Scroll indicator */}
-                  <div className="absolute top-2 right-2 text-xs text-gray-400 hidden sm:block">
-                    ← Kéo để xem thêm →
-                  </div>
-                  {/* Grid lines */}
-                  <div className="absolute inset-0 ml-12">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <div 
-                        key={i} 
-                        className="absolute w-full border-t border-gray-200"
-                        style={{ top: `${i * 25}%` }}
-                      ></div>
-                    ))}
-                  </div>
-                  
-                  {/* Y-axis labels */}
-                  <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500 pr-2">
-                    {(() => {
-                      const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
-                      const steps = 4;
-                      const stepValue = maxRevenue / steps;
-                      return Array.from({ length: steps + 1 }, (_, i) => (
-                        <div key={i} className="text-right">
-                          {((steps - i) * stepValue).toLocaleString('vi-VN')}đ
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                  
-                  <div 
-                    className="flex items-end h-full gap-1 sm:gap-2 ml-8 sm:ml-12 overflow-x-auto pb-2" 
-                    style={{ 
-                      minWidth: 'max-content',
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#d1d5db #f3f4f6',
-                      WebkitOverflowScrolling: 'touch'
-                    }}
-                  >
-                    {stats.revenueData.map((item, index) => {
-                      // Find the maximum revenue for scaling
-                      const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
+                <div className="p-4">
+                  {/* Desktop Chart */}
+                  <div className="hidden lg:block">
+                    <div className="relative h-96 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-6">
+                      {/* Grid Lines */}
+                      <div className="absolute inset-0 ml-16">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <div 
+                            key={i} 
+                            className="absolute w-full border-t border-gray-200"
+                            style={{ top: `${i * 25}%` }}
+                          ></div>
+                        ))}
+                      </div>
                       
-                      // Calculate bar height with better scaling
-                      let barHeight = 0;
-                      if (maxRevenue > 0 && item.revenue > 0) {
-                        // Use 90% of available height for better visual
-                        barHeight = Math.max(20, (item.revenue / maxRevenue) * 250);
-                      } else if (item.revenue === 0) {
-                        barHeight = 4; // Very small bar for zero values
-                      }
+                      {/* Y-axis Labels */}
+                      <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-sm text-gray-500 pr-3">
+                        {(() => {
+                          const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
+                          const steps = 4;
+                          const stepValue = maxRevenue / steps;
+                          return Array.from({ length: steps + 1 }, (_, i) => (
+                            <div key={i} className="text-right font-medium">
+                              {((steps - i) * stepValue).toLocaleString('vi-VN')}đ
+                            </div>
+                          ));
+                        })()}
+                      </div>
                       
-                      return (
-                        <div key={index} className="flex flex-col items-center group relative" style={{ minWidth: '70px', flexShrink: 0 }}>
-                          {/* Tooltip */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 pointer-events-none z-20 whitespace-nowrap shadow-lg">
-                            <div className="font-semibold">{item.revenue.toLocaleString('vi-VN')}đ</div>
-                            <div className="text-gray-300">{item.orders} đơn hàng</div>
-                            <div className="text-gray-300">{item.label}</div>
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                          </div>
+                      {/* Chart Bars */}
+                      <div className="flex items-end h-full gap-3 ml-20">
+                        {stats.revenueData.map((item, index) => {
+                          const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
+                          const barHeight = maxRevenue > 0 && item.revenue > 0 
+                            ? Math.max(30, (item.revenue / maxRevenue) * 300)
+                            : item.revenue === 0 ? 6 : 0;
                           
-                          {/* Bar Container */}
-                          <div className="flex flex-col items-center h-full justify-end">
-                            {/* Revenue Value Above Bar */}
-                            {item.revenue > 0 && (
-                              <div className="text-xs font-medium text-gray-700 mb-1">
-                                {item.revenue >= 1000000 
-                                  ? `${(item.revenue / 1000000).toFixed(1)}M`
-                                  : item.revenue >= 1000
-                                  ? `${(item.revenue / 1000).toFixed(0)}K`
-                                  : item.revenue.toLocaleString('vi-VN')
-                                }
+                          return (
+                            <div key={index} className="flex-1 flex flex-col items-center group relative">
+                              {/* Tooltip */}
+                              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 absolute -top-20 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-sm rounded-xl px-4 py-3 pointer-events-none z-30 whitespace-nowrap shadow-2xl">
+                                <div className="font-bold text-base">{item.revenue.toLocaleString('vi-VN')}đ</div>
+                                <div className="text-gray-300 text-sm">{item.orders} đơn hàng</div>
+                                <div className="text-gray-400 text-xs">{item.label}</div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                               </div>
-                            )}
-                            
-                            {/* Bar */}
-                            <div 
-                              className={`w-full rounded-t-lg transition-all duration-500 cursor-pointer shadow-sm hover:shadow-md ${
-                                item.revenue > 0 
-                                  ? 'bg-gradient-to-t from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500' 
-                                  : 'bg-gray-200 hover:bg-gray-300'
-                              }`}
-                              style={{ 
-                                height: `${barHeight}px`,
-                                minHeight: item.revenue > 0 ? '20px' : '4px'
-                              }}
-                            ></div>
-                            
-                            {/* Date Label */}
-                            <div className="mt-2 text-xs text-gray-600 text-center font-medium leading-tight">
-                              {item.label}
+                              
+                              {/* Value Above Bar */}
+                              {item.revenue > 0 && (
+                                <div className="text-sm font-bold text-gray-800 mb-2">
+                                  {item.revenue >= 1000000 
+                                    ? `${(item.revenue / 1000000).toFixed(1)}M`
+                                    : item.revenue >= 1000
+                                    ? `${(item.revenue / 1000).toFixed(0)}K`
+                                    : item.revenue.toLocaleString('vi-VN')
+                                  }
+                                </div>
+                              )}
+                              
+                              {/* Bar */}
+                              <div 
+                                className={`w-full rounded-t-xl transition-all duration-700 cursor-pointer shadow-lg hover:shadow-xl ${
+                                  item.revenue > 0 
+                                    ? 'bg-gradient-to-t from-blue-500 via-blue-400 to-blue-300 hover:from-blue-600 hover:via-blue-500 hover:to-blue-400' 
+                                    : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
+                                style={{ 
+                                  height: `${barHeight}px`,
+                                  minHeight: item.revenue > 0 ? '30px' : '6px'
+                                }}
+                              ></div>
+                              
+                              {/* Date Label */}
+                              <div className="mt-3 text-sm text-gray-700 text-center font-semibold">
+                                {item.label}
+                              </div>
+                              
+                              {/* Order Count */}
+                              <div className="text-xs text-gray-500 text-center mt-1">
+                                {item.orders} đơn
+                              </div>
                             </div>
-                            
-                            {/* Order Count */}
-                            <div className="text-xs text-gray-500 text-center mt-1">
-                              {item.orders} đơn
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Chart Legend */}
-                <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-gradient-to-t from-blue-500 to-blue-400 rounded"></div>
-                    <span>Doanh thu (VNĐ)</span>
+                  {/* Mobile Chart */}
+                  <div className="lg:hidden">
+                    <div className="relative h-80 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-3">
+                      {/* Mobile Scroll Container */}
+                      <div 
+                        className="flex items-end h-full gap-2 overflow-x-auto pb-2" 
+                        style={{ 
+                          minWidth: 'max-content',
+                          scrollbarWidth: 'thin',
+                          scrollbarColor: '#d1d5db #f3f4f6',
+                          WebkitOverflowScrolling: 'touch'
+                        }}
+                      >
+                        {stats.revenueData.map((item, index) => {
+                          const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
+                          const barHeight = maxRevenue > 0 && item.revenue > 0 
+                            ? Math.max(20, (item.revenue / maxRevenue) * 200)
+                            : item.revenue === 0 ? 4 : 0;
+                          
+                          return (
+                            <div key={index} className="flex flex-col items-center group relative" style={{ minWidth: '60px', flexShrink: 0 }}>
+                              {/* Mobile Tooltip */}
+                              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 pointer-events-none z-20 whitespace-nowrap shadow-lg">
+                                <div className="font-semibold">{item.revenue.toLocaleString('vi-VN')}đ</div>
+                                <div className="text-gray-300">{item.orders} đơn</div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                              
+                              {/* Value Above Bar */}
+                              {item.revenue > 0 && (
+                                <div className="text-xs font-bold text-gray-800 mb-1">
+                                  {item.revenue >= 1000000 
+                                    ? `${(item.revenue / 1000000).toFixed(1)}M`
+                                    : item.revenue >= 1000
+                                    ? `${(item.revenue / 1000).toFixed(0)}K`
+                                    : item.revenue.toString()
+                                  }
+                                </div>
+                              )}
+                              
+                              {/* Bar */}
+                              <div 
+                                className={`w-full rounded-t-lg transition-all duration-500 cursor-pointer shadow-md hover:shadow-lg ${
+                                  item.revenue > 0 
+                                    ? 'bg-gradient-to-t from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500' 
+                                    : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
+                                style={{ 
+                                  height: `${barHeight}px`,
+                                  minHeight: item.revenue > 0 ? '20px' : '4px'
+                                }}
+                              ></div>
+                              
+                              {/* Date Label */}
+                              <div className="mt-2 text-xs text-gray-600 text-center font-medium leading-tight">
+                                {item.label}
+                              </div>
+                              
+                              {/* Order Count */}
+                              <div className="text-xs text-gray-500 text-center mt-1">
+                                {item.orders}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Mobile Scroll Hint */}
+                      <div className="absolute top-2 right-2 text-xs text-gray-400 bg-white/80 px-2 py-1 rounded-full">
+                        ← Vuốt →
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <ShoppingCart className="w-4 h-4 text-gray-400" />
-                    <span>Số đơn hàng</span>
+
+                  {/* Chart Legend */}
+                  <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 bg-gradient-to-t from-blue-500 to-blue-400 rounded"></div>
+                      <span className="font-medium">Doanh thu (VNĐ)</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <ShoppingCart className="w-4 h-4 text-gray-400" />
+                      <span className="font-medium">Số đơn hàng</span>
+                    </div>
                   </div>
                 </div>
               </div>
