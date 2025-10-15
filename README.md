@@ -269,10 +269,6 @@ npm run seed              # Import lại data
 ```
 
 
-## 📄 License
-
-MIT License - Tự do sử dụng cho mục đích cá nhân và thương mại.
-
 ## 🤝 Contributing
 
 Pull requests are welcome! Đối với thay đổi lớn, vui lòng mở issue trước để thảo luận.
