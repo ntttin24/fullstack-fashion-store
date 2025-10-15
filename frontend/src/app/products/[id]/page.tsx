@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useScrollToTop } from '@/hooks/useScrollToTop'
 import Image from 'next/image'
 import Link from 'next/link'
 import { 
@@ -98,6 +99,9 @@ export default function ProductDetailPage() {
       }
     }
   }, [product, selectedColor, selectedSize, quantity])
+
+  // Scroll to top when component mounts or productId changes
+  useScrollToTop(productId)
 
   useEffect(() => {
     const fetchProduct = async () => {
