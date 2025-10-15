@@ -66,27 +66,29 @@ export default function AdminProductsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý sản phẩm</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý sản phẩm</h1>
           <p className="text-gray-600 mt-2">
             Tổng số: {filteredProducts.length} sản phẩm
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Link
             href="/admin/attributes"
-            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base"
           >
-            <Tag size={20} />
-            <span>Quản lý thuộc tính</span>
+            <Tag size={18} />
+            <span className="hidden sm:inline">Quản lý thuộc tính</span>
+            <span className="sm:hidden">Thuộc tính</span>
           </Link>
           <Link
             href="/admin/products/create"
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
-            <Plus size={20} />
-            <span>Thêm sản phẩm</span>
+            <Plus size={18} />
+            <span className="hidden sm:inline">Thêm sản phẩm</span>
+            <span className="sm:hidden">Thêm mới</span>
           </Link>
         </div>
       </div>
@@ -108,7 +110,8 @@ export default function AdminProductsPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
@@ -239,55 +242,145 @@ export default function AdminProductsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards */}
+        <div className="lg:hidden">
+          {filteredProducts.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              {searchQuery ? 'Không tìm thấy sản phẩm' : 'Chưa có sản phẩm nào'}
+            </div>
+          ) : (
+            <div className="space-y-4 p-4">
+              {filteredProducts.map((product) => {
+                const totalStock = getTotalStock(product)
+                const variantCount = getVariantCount(product)
+                const categoryName = typeof product.category === 'string' 
+                  ? product.category 
+                  : product.category?.name || 'N/A'
+
+                return (
+                  <div key={product.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <div className="flex items-start gap-4">
+                      <Image
+                        src={product.images[0] || '/images/placeholder.svg'}
+                        alt={product.name}
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-900 text-sm leading-tight mb-1">
+                          {product.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 mb-2">{categoryName}</p>
+                        
+                        <div className="space-y-1 mb-3">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Giá:</span>
+                            <span className="font-medium text-gray-900">
+                              {product.price.toLocaleString('vi-VN')}đ
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Variants:</span>
+                            <span className="text-gray-900">{variantCount}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Tồn kho:</span>
+                            <span className={`font-medium ${
+                              totalStock > 20 ? 'text-green-600' : 
+                              totalStock > 0 ? 'text-yellow-600' : 
+                              'text-red-600'
+                            }`}>
+                              {totalStock}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              product.featured
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {product.featured ? 'Nổi bật' : 'Thường'}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/admin/products/${product.id}`}
+                              className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded"
+                              title="Chỉnh sửa"
+                            >
+                              <Edit size={16} />
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(product.id)}
+                              className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded"
+                              title="Xóa"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-        <div className="bg-white rounded-lg shadow p-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Tổng sản phẩm</p>
-              <p className="text-2xl font-bold text-gray-900">{products.length}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Tổng sản phẩm</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900">{products.length}</p>
             </div>
-            <Package className="text-blue-600" size={32} />
+            <Package className="text-blue-600" size={24} />
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Tổng variants</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-xs sm:text-sm text-gray-600">Tổng variants</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900">
                 {products.reduce((sum, p) => sum + getVariantCount(p), 0)}
               </p>
             </div>
-            <Tag className="text-purple-600" size={32} />
+            <Tag className="text-purple-600" size={24} />
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Tổng tồn kho</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-xs sm:text-sm text-gray-600">Tổng tồn kho</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900">
                 {products.reduce((sum, p) => sum + getTotalStock(p), 0)}
               </p>
             </div>
-            <svg className="text-green-600" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="text-green-600" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Sản phẩm nổi bật</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-xs sm:text-sm text-gray-600">Sản phẩm nổi bật</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900">
                 {products.filter(p => p.featured).length}
               </p>
             </div>
-            <svg className="text-yellow-600" width="32" height="32" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="text-yellow-600" width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           </div>
