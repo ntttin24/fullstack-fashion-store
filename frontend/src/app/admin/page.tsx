@@ -559,80 +559,152 @@ export default function AdminDashboard() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* New Enhanced Chart */}
-              <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                {/* Chart Header */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-100">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                        <BarChart3 className="w-4 h-4 text-white" />
+            <div className="space-y-6">
+              {/* Revolutionary Revenue Chart */}
+              <div className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 rounded-2xl shadow-xl border border-white/50 backdrop-blur-sm overflow-hidden">
+                {/* Modern Chart Header */}
+                <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white p-6">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                          <TrendingUp className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold">Doanh Thu Theo Thời Gian</h3>
+                          <p className="text-blue-100 text-sm">Phân tích xu hướng kinh doanh</p>
+                        </div>
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900">Biểu đồ doanh thu</h3>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="text-gray-600">
-                        <span className="font-medium">Tổng:</span>
-                        <span className="ml-1 font-bold text-blue-600">
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">
                           {stats.totalRevenueForPeriod.toLocaleString('vi-VN')}đ
-                        </span>
+                        </div>
+                        <div className="text-blue-100 text-sm">Tổng doanh thu</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Chart Container */}
-                <div className="p-4">
-                  {/* Desktop Chart */}
-                  <div className="hidden lg:block">
-                    <div className="relative h-96 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-6">
-                      {/* Grid Lines */}
-                      <div className="absolute inset-0 ml-16">
-                        {Array.from({ length: 5 }, (_, i) => (
+                {/* Chart Statistics Bar */}
+                <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {stats.revenueData.reduce((sum, item) => sum + item.orders, 0)}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">Tổng đơn hàng</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {Math.round(stats.averageOrderValue).toLocaleString('vi-VN')}đ
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">Giá trị TB/đơn</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {Math.max(...stats.revenueData.map(d => d.revenue)).toLocaleString('vi-VN')}đ
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">Ngày cao nhất</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {stats.revenueData.filter(d => d.revenue > 0).length}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">Ngày có doanh thu</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Revolutionary Chart Area */}
+                <div className="p-6">
+                  <div className="relative">
+                    {/* Chart Container */}
+                    <div className="relative h-96 bg-gradient-to-t from-gray-50/50 to-transparent rounded-xl p-4 overflow-hidden">
+                      {/* Scroll Hint */}
+                      <div className="absolute top-2 right-2 z-20 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-gray-500 font-medium shadow-sm">
+                        ← Kéo để xem thêm →
+                      </div>
+                      {/* Animated Background Grid */}
+                      <div className="absolute inset-0">
+                        {Array.from({ length: 6 }, (_, i) => (
                           <div 
                             key={i} 
-                            className="absolute w-full border-t border-gray-200"
-                            style={{ top: `${i * 25}%` }}
+                            className="absolute w-full border-t border-gray-200/50"
+                            style={{ top: `${i * 20}%` }}
+                          ></div>
+                        ))}
+                        {Array.from({ length: 8 }, (_, i) => (
+                          <div 
+                            key={i} 
+                            className="absolute h-full border-l border-gray-200/30"
+                            style={{ left: `${i * 12.5}%` }}
                           ></div>
                         ))}
                       </div>
-                      
-                      {/* Y-axis Labels */}
-                      <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-sm text-gray-500 pr-3">
+
+                      {/* Y-Axis with Better Formatting */}
+                      <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-600 pr-4 font-medium">
                         {(() => {
                           const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
-                          const steps = 4;
+                          const steps = 5;
                           const stepValue = maxRevenue / steps;
                           return Array.from({ length: steps + 1 }, (_, i) => (
-                            <div key={i} className="text-right font-medium">
-                              {((steps - i) * stepValue).toLocaleString('vi-VN')}đ
+                            <div key={i} className="text-right bg-white/80 px-2 py-1 rounded">
+                              {((steps - i) * stepValue / 1000000).toFixed(1)}M
                             </div>
                           ));
                         })()}
                       </div>
                       
-                      {/* Chart Bars */}
-                      <div className="flex items-end h-full gap-3 ml-20">
+                      {/* Revolutionary Chart Bars */}
+                      <div 
+                        className="flex items-end h-full gap-3 ml-16 overflow-x-auto overflow-y-hidden pb-4" 
+                        style={{ 
+                          minWidth: 'max-content',
+                          scrollbarWidth: 'thin',
+                          scrollbarColor: '#d1d5db #f3f4f6',
+                          WebkitOverflowScrolling: 'touch',
+                          scrollBehavior: 'smooth',
+                          paddingLeft: '8px',
+                          paddingRight: '8px'
+                        }}
+                      >
                         {stats.revenueData.map((item, index) => {
                           const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
                           const barHeight = maxRevenue > 0 && item.revenue > 0 
-                            ? Math.max(30, (item.revenue / maxRevenue) * 300)
-                            : item.revenue === 0 ? 6 : 0;
+                            ? Math.max(40, (item.revenue / maxRevenue) * 320)
+                            : 8;
+                          
+                          // Dynamic color based on performance
+                          const performance = maxRevenue > 0 ? (item.revenue / maxRevenue) : 0;
+                          let barColor = 'from-gray-300 to-gray-400';
+                          if (performance > 0.8) barColor = 'from-green-500 to-emerald-400';
+                          else if (performance > 0.6) barColor = 'from-blue-500 to-cyan-400';
+                          else if (performance > 0.4) barColor = 'from-yellow-500 to-orange-400';
+                          else if (performance > 0.2) barColor = 'from-orange-500 to-red-400';
+                          else if (performance > 0) barColor = 'from-red-500 to-pink-400';
                           
                           return (
-                            <div key={index} className="flex-1 flex flex-col items-center group relative">
-                              {/* Tooltip */}
-                              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 absolute -top-20 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-sm rounded-xl px-4 py-3 pointer-events-none z-30 whitespace-nowrap shadow-2xl">
-                                <div className="font-bold text-base">{item.revenue.toLocaleString('vi-VN')}đ</div>
-                                <div className="text-gray-300 text-sm">{item.orders} đơn hàng</div>
-                                <div className="text-gray-400 text-xs">{item.label}</div>
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                            <div key={index} className="flex flex-col items-center group relative" style={{ minWidth: '80px', flexShrink: 0 }}>
+                              {/* Enhanced Tooltip */}
+                              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 absolute -top-24 left-1/2 transform -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white text-sm rounded-2xl px-4 py-3 pointer-events-none z-30 whitespace-nowrap shadow-2xl border border-white/20">
+                                <div className="font-bold text-lg text-center">{item.revenue.toLocaleString('vi-VN')}đ</div>
+                                <div className="text-gray-300 text-center">{item.orders} đơn hàng</div>
+                                <div className="text-gray-400 text-xs text-center mt-1">{item.label}</div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-6 border-transparent border-t-gray-900/95"></div>
                               </div>
+                              
+                              {/* Performance Badge */}
+                              {item.revenue > 0 && performance > 0.7 && (
+                                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full">
+                                  🔥 TOP
+                                </div>
+                              )}
                               
                               {/* Value Above Bar */}
                               {item.revenue > 0 && (
-                                <div className="text-sm font-bold text-gray-800 mb-2">
+                                <div className="text-sm font-bold text-gray-800 mb-2 bg-white/80 px-2 py-1 rounded-lg shadow-sm">
                                   {item.revenue >= 1000000 
                                     ? `${(item.revenue / 1000000).toFixed(1)}M`
                                     : item.revenue >= 1000
@@ -642,95 +714,31 @@ export default function AdminDashboard() {
                                 </div>
                               )}
                               
-                              {/* Bar */}
+                              {/* Revolutionary Bar with Animation */}
                               <div 
-                                className={`w-full rounded-t-xl transition-all duration-700 cursor-pointer shadow-lg hover:shadow-xl ${
-                                  item.revenue > 0 
-                                    ? 'bg-gradient-to-t from-blue-500 via-blue-400 to-blue-300 hover:from-blue-600 hover:via-blue-500 hover:to-blue-400' 
-                                    : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                                className={`w-full rounded-t-2xl transition-all duration-1000 cursor-pointer shadow-lg hover:shadow-2xl transform hover:-translate-y-1 bg-gradient-to-t ${barColor} hover:scale-105 relative overflow-hidden`}
                                 style={{ 
                                   height: `${barHeight}px`,
-                                  minHeight: item.revenue > 0 ? '30px' : '6px'
+                                  minHeight: item.revenue > 0 ? '40px' : '8px'
                                 }}
-                              ></div>
+                              >
+                                {/* Shimmer Effect */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 animate-pulse"></div>
+                                
+                                {/* Performance Indicator */}
+                                {item.revenue > 0 && (
+                                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30"></div>
+                                )}
+                              </div>
                               
-                              {/* Date Label */}
-                              <div className="mt-3 text-sm text-gray-700 text-center font-semibold">
+                              {/* Enhanced Date Label */}
+                              <div className="mt-3 text-sm text-gray-700 text-center font-bold bg-white/60 px-2 py-1 rounded-lg">
                                 {item.label}
                               </div>
                               
-                              {/* Order Count */}
-                              <div className="text-xs text-gray-500 text-center mt-1">
-                                {item.orders} đơn
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mobile Chart */}
-                  <div className="lg:hidden">
-                    <div className="relative h-80 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-3">
-                      {/* Mobile Scroll Container */}
-                      <div 
-                        className="flex items-end h-full gap-2 overflow-x-auto pb-2" 
-                        style={{ 
-                          minWidth: 'max-content',
-                          scrollbarWidth: 'thin',
-                          scrollbarColor: '#d1d5db #f3f4f6',
-                          WebkitOverflowScrolling: 'touch'
-                        }}
-                      >
-                        {stats.revenueData.map((item, index) => {
-                          const maxRevenue = Math.max(...stats.revenueData.map(d => d.revenue));
-                          const barHeight = maxRevenue > 0 && item.revenue > 0 
-                            ? Math.max(20, (item.revenue / maxRevenue) * 200)
-                            : item.revenue === 0 ? 4 : 0;
-                          
-                          return (
-                            <div key={index} className="flex flex-col items-center group relative" style={{ minWidth: '60px', flexShrink: 0 }}>
-                              {/* Mobile Tooltip */}
-                              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 pointer-events-none z-20 whitespace-nowrap shadow-lg">
-                                <div className="font-semibold">{item.revenue.toLocaleString('vi-VN')}đ</div>
-                                <div className="text-gray-300">{item.orders} đơn</div>
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                              
-                              {/* Value Above Bar */}
-                              {item.revenue > 0 && (
-                                <div className="text-xs font-bold text-gray-800 mb-1">
-                                  {item.revenue >= 1000000 
-                                    ? `${(item.revenue / 1000000).toFixed(1)}M`
-                                    : item.revenue >= 1000
-                                    ? `${(item.revenue / 1000).toFixed(0)}K`
-                                    : item.revenue.toString()
-                                  }
-                                </div>
-                              )}
-                              
-                              {/* Bar */}
-                              <div 
-                                className={`w-full rounded-t-lg transition-all duration-500 cursor-pointer shadow-md hover:shadow-lg ${
-                                  item.revenue > 0 
-                                    ? 'bg-gradient-to-t from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500' 
-                                    : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
-                                style={{ 
-                                  height: `${barHeight}px`,
-                                  minHeight: item.revenue > 0 ? '20px' : '4px'
-                                }}
-                              ></div>
-                              
-                              {/* Date Label */}
-                              <div className="mt-2 text-xs text-gray-600 text-center font-medium leading-tight">
-                                {item.label}
-                              </div>
-                              
-                              {/* Order Count */}
-                              <div className="text-xs text-gray-500 text-center mt-1">
+                              {/* Order Count with Icon */}
+                              <div className="flex items-center gap-1 text-xs text-gray-500 text-center mt-1">
+                                <ShoppingCart className="w-3 h-3" />
                                 {item.orders}
                               </div>
                             </div>
@@ -738,22 +746,39 @@ export default function AdminDashboard() {
                         })}
                       </div>
                       
-                      {/* Mobile Scroll Hint */}
-                      <div className="absolute top-2 right-2 text-xs text-gray-400 bg-white/80 px-2 py-1 rounded-full">
-                        ← Vuốt →
+                      {/* Scroll Indicators */}
+                      <div className="absolute left-16 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                      </div>
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Chart Legend */}
-                  <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 bg-gradient-to-t from-blue-500 to-blue-400 rounded"></div>
-                      <span className="font-medium">Doanh thu (VNĐ)</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <ShoppingCart className="w-4 h-4 text-gray-400" />
-                      <span className="font-medium">Số đơn hàng</span>
+                    {/* Enhanced Legend */}
+                    <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-100">
+                      <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-t from-green-500 to-emerald-400 rounded"></div>
+                          <span className="font-medium">Xuất sắc (80%+)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-t from-blue-500 to-cyan-400 rounded"></div>
+                          <span className="font-medium">Tốt (60-80%)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-t from-yellow-500 to-orange-400 rounded"></div>
+                          <span className="font-medium">Trung bình (40-60%)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-t from-orange-500 to-red-400 rounded"></div>
+                          <span className="font-medium">Thấp (20-40%)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-t from-red-500 to-pink-400 rounded"></div>
+                          <span className="font-medium">Rất thấp (&lt;20%)</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
